@@ -318,6 +318,20 @@ class WC_PagSeguro_Gateway extends WC_Payment_Gateway {
 				/* translators: %s: log page link */
 				'description' => sprintf( __( 'Log PagSeguro events, such as API requests, inside %s', 'woocommerce-pagseguro' ), $this->get_log_view() ),
 			),
+			'webservice_email'                => array(
+				'title'       => __( 'Webservice Email', 'woocommerce-pagseguro' ),
+				'type'        => 'text',
+				'description' => __( 'Please enter your Webservice email address.', 'woocommerce-pagseguro' ),
+				'desc_tip'    => true,
+				'default'     => '',
+			),
+			'webservice_token'                => array(
+				'title'       => __( 'Webservice Token', 'woocommerce-pagseguro' ),
+				'type'        => 'text',
+				'description' => __( 'Please enter your Webservice token.', 'woocommerce-pagseguro' ),
+				'desc_tip'    => true,
+				'default'     => '',
+			),
 		);
 	}
 
