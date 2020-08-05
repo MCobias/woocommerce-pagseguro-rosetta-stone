@@ -336,7 +336,7 @@ class WC_PagSeguro_Gateway extends WC_Payment_Gateway {
 				'description' => __( 'Please enter your Webservice token.', 'woocommerce-pagseguro' ),
 				'desc_tip'    => true,
 				'default'     => '',
-			),
+			)
 		);
 	}
 
