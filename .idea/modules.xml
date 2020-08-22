@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/includes/client/.idea/client.iml" filepath="$PROJECT_DIR$/includes/client/.idea/client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../woocommerce/.idea/woocommerce.iml" filepath="$PROJECT_DIR$/../woocommerce/.idea/woocommerce.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/woocommerce-pagseguro-master.iml" filepath="$PROJECT_DIR$/.idea/woocommerce-pagseguro-master.iml" />
     </modules>
   </component>

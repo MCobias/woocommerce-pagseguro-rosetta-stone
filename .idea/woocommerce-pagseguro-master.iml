@@ -4,5 +4,8 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="woocommerce" />
+    <orderEntry type="module" module-name="client" />
+    <orderEntry type="module" module-name="client" />
   </component>
 </module>

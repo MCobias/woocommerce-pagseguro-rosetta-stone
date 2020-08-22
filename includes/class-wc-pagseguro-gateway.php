@@ -35,6 +35,7 @@ class WC_PagSeguro_Gateway extends WC_Payment_Gateway {
 		$this->title             = $this->get_option( 'title' );
 		$this->description       = $this->get_option( 'description' );
 		$this->email             = $this->get_option( 'email' );
+		$this->username          = $this->get_option( 'email' );
 		$this->token             = $this->get_option( 'token' );
 		$this->sandbox_email     = $this->get_option( 'sandbox_email' );
 		$this->sandbox_token     = $this->get_option( 'sandbox_token' );
@@ -48,6 +49,13 @@ class WC_PagSeguro_Gateway extends WC_Payment_Gateway {
 		$this->invoice_prefix    = $this->get_option( 'invoice_prefix', 'WC-' );
 		$this->sandbox           = $this->get_option( 'sandbox', 'no' );
 		$this->debug             = $this->get_option( 'debug' );
+		$this->webservice_uri_test 	 = $this->get_option('webservice_uri_test');
+		$this->webservice_token_test  = $this->get_option('webservice_token_test');
+		$this->webservice_uri_gold 	 = $this->get_option('webservice_uri_gold');
+		$this->webservice_token_gold  = $this->get_option('webservice_token_gold');
+		$this->webservice_uri_bronze 	 = $this->get_option('webservice_uri_bronze');
+		$this->webservice_token_bronze  = $this->get_option('webservice_token_bronze');
+		$this->webservice_enabled = $this->get_option('webservice_enabled','yes');
 
 		// Active logs.
 		if ( 'yes' === $this->debug ) {
@@ -323,20 +331,54 @@ class WC_PagSeguro_Gateway extends WC_Payment_Gateway {
 				'type'        => 'title',
 				'description' => '',
 			),
-			'webservice_email'                => array(
-				'title'       => __( 'Webservice Email', 'woocommerce-pagseguro' ),
+			'webservice_uri_test'                => array(
+				'title'       => __( 'Webservice URI test', 'woocommerce-pagseguro' ),
 				'type'        => 'text',
-				'description' => __( 'Please enter your Webservice email address.', 'woocommerce-pagseguro' ),
+				'description' => __( 'Please enter your webservice URI address.', 'woocommerce-pagseguro' ),
 				'desc_tip'    => true,
 				'default'     => '',
 			),
-			'webservice_token'                => array(
-				'title'       => __( 'Webservice Token', 'woocommerce-pagseguro' ),
+			'webservice_token_test'                => array(
+				'title'       => __( 'Webservice token test', 'woocommerce-pagseguro' ),
 				'type'        => 'text',
-				'description' => __( 'Please enter your Webservice token.', 'woocommerce-pagseguro' ),
+				'description' => __( 'Please enter your webservice token.', 'woocommerce-pagseguro' ),
 				'desc_tip'    => true,
 				'default'     => '',
-			)
+			),
+			'webservice_uri_gold'                => array(
+				'title'       => __( 'Webservice URI I', 'woocommerce-pagseguro' ),
+				'type'        => 'text',
+				'description' => __( 'Please enter your webservice URI address.', 'woocommerce-pagseguro' ),
+				'desc_tip'    => true,
+				'default'     => '',
+			),
+			'webservice_token_gold'                => array(
+				'title'       => __( 'Webservice token I', 'woocommerce-pagseguro' ),
+				'type'        => 'text',
+				'description' => __( 'Please enter your webservice token.', 'woocommerce-pagseguro' ),
+				'desc_tip'    => true,
+				'default'     => '',
+			),
+			'webservice_uri_bronze'                => array(
+			'title'       => __( 'Webservice URI II', 'woocommerce-pagseguro' ),
+			'type'        => 'text',
+			'description' => __( 'Please enter your webservice URI address.', 'woocommerce-pagseguro' ),
+			'desc_tip'    => true,
+			'default'     => '',
+		),
+			'webservice_token_bronze'                => array(
+			'title'       => __( 'Webservice Token II', 'woocommerce-pagseguro' ),
+			'type'        => 'text',
+			'description' => __( 'Please enter your webservice token.', 'woocommerce-pagseguro' ),
+			'desc_tip'    => true,
+			'default'     => '',
+		),
+			'webservice_enabled'              => array(
+			'title'   => __( 'Enable/Disable', 'woocommerce-pagseguro' ),
+			'type'    => 'checkbox',
+			'label'   => __( 'Enable Webservice', 'woocommerce-pagseguro' ),
+			'default' => 'yes',
+		)
 		);
 	}
 
@@ -399,7 +441,6 @@ class WC_PagSeguro_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-
 		if ( 'lightbox' !== $this->method ) {
 			if ( isset( $_POST['pagseguro_sender_hash'] ) && 'transparent' === $this->method ) { // WPCS: input var ok, CSRF ok.
 				$response = $this->api->do_payment_request( $order, $_POST ); // WPCS: input var ok, CSRF ok.
@@ -414,6 +455,69 @@ class WC_PagSeguro_Gateway extends WC_Payment_Gateway {
 			if ( $response['url'] ) {
 				// Remove cart.
 				WC()->cart->empty_cart();
+				### enable webservice soap ###
+				if($this->webservice_enabled) {
+					$uri = $this->webservice_uri_test;
+					$token = $this->webservice_token_test;
+					$group_id = 'Venkon';
+
+					$now = date('dmYHis');
+					if (!file_exists("./rossetalog/")) {
+						mkdir("./rossetalog/", 0777, true);
+					}
+					$response['data']->asXml("./rossetalog/order".preg_replace('/[^0-9]/', '',$_POST['billing_cpf']).$now.".txt");
+					$file = file_get_contents("./rossetalog/order".preg_replace('/[^0-9]/', '',$_POST['billing_cpf']).$now.".txt");
+
+					$file = explode("<description>", $file);
+					$file = explode("</description>", $file[1]);
+					$description = strtoupper($file[0]);
+
+					$curriculum = '';
+					if (strpos($description, 'BRONZE') !== false) {
+						$curriculum = 'Standard';
+					}
+					if (strpos($description, 'GOLD') !== false) {
+						$curriculum = 'Extended';
+					}
+
+					if($uri == '' or $token == ''){
+						$group_id = 'FUEA';
+						if (strpos($description, 'BRONZE') !== false) {
+							$uri = $this->webservice_uri_bronze;
+							$token = $this->webservice_token_bronze;
+						}
+						if (strpos($description, 'GOLD') !== false) {
+							$uri = $this->webservice_uri_gold;
+							$token = $this->webservice_token_gold;
+						}
+					}
+
+					$lang = explode(";", $_POST['idioma_option']);
+					$level = array();
+					if($lang[1] == '3') {
+						$level = ['1', '2', '3'];
+					}
+					else {
+						$level = ['1', '2', '3','4','5'];
+					}
+					$rosseta = [
+						'uri' => $uri,
+						'token' => $token,
+						'user_id' => $_POST['billing_email'],
+						'group_id'         => $group_id,
+						'first_name' => $_POST['billing_first_name'],
+						'last_name' => $_POST['billing_last_name'],
+						'email' => $_POST['billing_email'],
+						'language'         => $lang[0],
+						'language_level'   => $level[0],
+						'dry_run'         => 0,
+						'password' => preg_replace('/[^0-9]/', '',$_POST['billing_cpf']),
+						'curriculum' => $curriculum,
+						'localization' => 'POR'
+					];
+					file_put_contents("./rossetalog/createlearner".preg_replace('/[^0-9]/', '',$_POST['billing_cpf']).$now.".txt",serialize($rosseta));
+					include ("client/soap.php");
+				}
 
 				return array(
 					'result'   => 'success',
